@@ -1,0 +1,25 @@
+{
+  "name": "git-repo-info",
+  "version": "0.0.0",
+  "description": "Retrieve current sha and branch name.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rwjblue/git-repo-info.git"
+  },
+  "keywords": [
+    "git"
+  ],
+  "author": "Robert Jackson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rwjblue/git-repo-info/issues"
+  },
+  "homepage": "https://github.com/rwjblue/git-repo-info",
+  "devDependencies": {
+    "mocha": "^1.21.4"
+  }
+}
