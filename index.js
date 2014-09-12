@@ -32,8 +32,6 @@ function findRepo(startingPath) {
 module.exports = function(gitPath) {
   if (!gitPath) { gitPath = findRepo(); }
 
-  var headFilePath   = path.join(gitPath, 'HEAD');
-
   var result = {
     sha: null,
     abbreviatedSha: null,
@@ -41,6 +39,8 @@ module.exports = function(gitPath) {
   }
 
   try {
+    var headFilePath   = path.join(gitPath, 'HEAD');
+
     if (fs.existsSync(headFilePath)) {
       var branchSHA;
       var headFile = fs.readFileSync(headFilePath, {encoding: 'utf8'});
