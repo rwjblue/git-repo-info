@@ -35,7 +35,8 @@ module.exports = function(gitPath) {
   var result = {
     sha: null,
     abbreviatedSha: null,
-    branch: null
+    branch: null,
+    tag: null
   }
 
   try {
@@ -47,6 +48,7 @@ module.exports = function(gitPath) {
       var branchName = headFile.split('/').slice(-1)[0].trim();
       var refPath = headFile.split(' ')[1];
 
+      // Find branch and SHA
       if (refPath) {
         var branchPath = path.join(gitPath, refPath.trim());
 
@@ -57,6 +59,18 @@ module.exports = function(gitPath) {
       }
 
       result.abbreviatedSha = result.sha.slice(0,10);
+
+      // Find tag
+      var packedRefsFilePath = path.join(gitPath, 'packed-refs');
+      if (fs.existsSync(packedRefsFilePath)) {
+        var packedRefsFile = fs.readFileSync(packedRefsFilePath, {encoding: 'utf8'});
+        var tagLine = packedRefsFile.split('\n').filter(function(l) {
+          return l.indexOf("refs/tags") > -1 && l.indexOf(result.sha) > -1;
+        })[0];
+        if (tagLine) {
+          result.tag = tagLine.split('tags/')[1]
+        }
+      }
     }
   } catch (e) {
     // eat it
