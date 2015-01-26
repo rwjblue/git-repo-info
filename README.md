@@ -12,6 +12,7 @@ var info = getRepoInfo();
 info.branch         //=> will be the current branch
 info.sha            //=> will be the current sha
 info.abbreviatedSha //=> will be the first 10 chars of the current sha
+info.tag            //=> will be the tag for the current sha (or `null` if no tag exists)
 ```
 
 When called without any arguments, `git-repo-info` will automatically lookup upwards
