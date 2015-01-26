@@ -64,11 +64,12 @@ module.exports = function(gitPath) {
       var packedRefsFilePath = path.join(gitPath, 'packed-refs');
       if (fs.existsSync(packedRefsFilePath)) {
         var packedRefsFile = fs.readFileSync(packedRefsFilePath, {encoding: 'utf8'});
-        var tagLine = packedRefsFile.split('\n').filter(function(l) {
-          return l.indexOf("refs/tags") > -1 && l.indexOf(result.sha) > -1;
+        var tagLine = packedRefsFile.split('\n').filter(function(line) {
+          return line.indexOf("refs/tags") > -1 && line.indexOf(result.sha) > -1;
         })[0];
+
         if (tagLine) {
-          result.tag = tagLine.split('tags/')[1]
+          result.tag = tagLine.split('tags/')[1];
         }
       }
     }
