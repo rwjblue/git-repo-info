@@ -57,7 +57,8 @@ describe('git-repo-info', function() {
       var expected = {
         branch: 'master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
-        abbreviatedSha: '5359aabd38'
+        abbreviatedSha: '5359aabd38',
+        tag: null
       }
 
       assert.deepEqual(result, expected);
@@ -70,7 +71,23 @@ describe('git-repo-info', function() {
       var expected = {
         branch: null,
         sha: '9dac893d5a83c02344d91e79dad8904889aeacb1',
-        abbreviatedSha: '9dac893d5a'
+        abbreviatedSha: '9dac893d5a',
+        tag: null
+      }
+
+      assert.deepEqual(result, expected);
+    });
+
+
+    it('returns an object with repo info, including the tag', function() {
+      var repoRoot = path.join(testFixturesPath, 'tagged-commit');
+      var result = repoInfo(path.join(repoRoot, gitDir))
+
+      var expected = {
+        branch: 'master',
+        sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
+        abbreviatedSha: '5359aabd38',
+        tag: 'my-tag'
       }
 
       assert.deepEqual(result, expected);
