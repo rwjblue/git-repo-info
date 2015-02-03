@@ -29,6 +29,37 @@ function findRepo(startingPath) {
   return null;
 }
 
+function findPackedTag(gitPath, sha) {
+  var packedRefsFilePath = path.join(gitPath, 'packed-refs');
+  if (fs.existsSync(packedRefsFilePath)) {
+    var packedRefsFile = fs.readFileSync(packedRefsFilePath, {encoding: 'utf8'});
+    var tagLine = packedRefsFile.split('\n').filter(function(line) {
+      return line.indexOf("refs/tags") > -1 && line.indexOf(sha) > -1;
+    })[0];
+
+    if (tagLine) {
+      return tagLine.split('tags/')[1];
+    }
+  }
+}
+
+function findTag(gitPath, sha) {
+  var tag = findPackedTag(gitPath, sha);
+  if (tag) { return tag; }
+
+  var tagsPath = path.join(gitPath, 'refs', 'tags');
+  if (!fs.existsSync(tagsPath)) { return; }
+
+  var tags = fs.readdirSync(tagsPath);
+
+  for (var i = 0, l = tags.length; i < l; i++) {
+    var tagPath = path.join(tagsPath, tags[i]);
+    if (fs.readFileSync(tagPath, { encoding: 'utf8' }).indexOf(sha) > -1) {
+      return tags[i];
+    }
+  }
+}
+
 module.exports = function(gitPath) {
   if (!gitPath) { gitPath = findRepo(); }
 
@@ -61,16 +92,9 @@ module.exports = function(gitPath) {
       result.abbreviatedSha = result.sha.slice(0,10);
 
       // Find tag
-      var packedRefsFilePath = path.join(gitPath, 'packed-refs');
-      if (fs.existsSync(packedRefsFilePath)) {
-        var packedRefsFile = fs.readFileSync(packedRefsFilePath, {encoding: 'utf8'});
-        var tagLine = packedRefsFile.split('\n').filter(function(line) {
-          return line.indexOf("refs/tags") > -1 && line.indexOf(result.sha) > -1;
-        })[0];
-
-        if (tagLine) {
-          result.tag = tagLine.split('tags/')[1];
-        }
+      var tag = findTag(gitPath, result.sha);
+      if (tag) {
+        result.tag = tag;
       }
     }
   } catch (e) {
