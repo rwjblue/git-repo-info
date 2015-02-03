@@ -79,8 +79,22 @@ describe('git-repo-info', function() {
     });
 
 
-    it('returns an object with repo info, including the tag', function() {
-      var repoRoot = path.join(testFixturesPath, 'tagged-commit');
+    it('returns an object with repo info, including the tag (packed tags)', function() {
+      var repoRoot = path.join(testFixturesPath, 'tagged-commit-packed');
+      var result = repoInfo(path.join(repoRoot, gitDir))
+
+      var expected = {
+        branch: 'master',
+        sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
+        abbreviatedSha: '5359aabd38',
+        tag: 'my-tag'
+      }
+
+      assert.deepEqual(result, expected);
+    });
+
+    it('returns an object with repo info, including the tag (unpacked tags)', function() {
+      var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');
       var result = repoInfo(path.join(repoRoot, gitDir))
 
       var expected = {
