@@ -10,6 +10,8 @@ var root = process.cwd();
 var testFixturesPath = path.join(__dirname, 'fixtures');
 var gitDir = 'dot-git';
 
+repoInfo._suppressErrors = false;
+
 describe('git-repo-info', function() {
   before(function() {
     repoInfo._changeGitDir(gitDir);
@@ -101,9 +103,23 @@ describe('git-repo-info', function() {
 
       var expected = {
         branch: 'master',
-        sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
-        abbreviatedSha: '5359aabd38',
-        tag: 'my-tag'
+        sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
+        abbreviatedSha: 'c1ee41c325',
+        tag: 'awesome-tag'
+      };
+
+      assert.deepEqual(result, expected);
+    });
+
+    it('returns an object with repo info, including the tag (annotated tags)', function() {
+      var repoRoot = path.join(testFixturesPath, 'tagged-annotated');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+
+      var expected = {
+        branch: 'master',
+        sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
+        abbreviatedSha: 'c1ee41c325',
+        tag: 'awesome-tag'
       };
 
       assert.deepEqual(result, expected);
