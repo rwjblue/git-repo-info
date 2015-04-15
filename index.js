@@ -103,7 +103,10 @@ module.exports = function(gitPath) {
 
     if (fs.existsSync(headFilePath)) {
       var headFile = fs.readFileSync(headFilePath, {encoding: 'utf8'});
-      var branchName = headFile.split('/').slice(-1)[0].trim();
+      var branchName = headFile.split('/').slice(2).join('/').trim();
+      if (!branchName) {
+        branchName = headFile.split('/').slice(-1)[0].trim();
+      }
       var refPath = headFile.split(' ')[1];
 
       // Find branch and SHA
