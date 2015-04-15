@@ -48,6 +48,13 @@ function commitForTag(gitPath, tag) {
   var tagPath = path.join(gitPath, 'refs', 'tags', tag);
   var taggedObject = fs.readFileSync(tagPath, { encoding: 'utf8' }).trim();
   var objectPath = path.join(gitPath, 'objects', taggedObject.slice(0, 2), taggedObject.slice(2));
+
+  if (!zlib.inflateSync) {
+    // we cannot support annotated tags on node v0.10 because
+    // zlib does not allow sync access
+    return taggedObject;
+  }
+
   var objectContents = zlib.inflateSync(fs.readFileSync(objectPath)).toString();
 
   // 'tag 172\u0000object c1ee41c325d54f410b133e0018c7a6b1316f6cda\ntype commit\ntag awesome-tag\ntagger Robert Jackson <robert.w.jackson@me.com> 1429100021 -0400\n\nI am making an annotated tag.\n'
