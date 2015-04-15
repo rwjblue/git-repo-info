@@ -4,6 +4,8 @@ var assert = require('assert');
 var path = require('path');
 var repoInfo = require('../index');
 
+require('mocha-jshint')();
+
 var root = process.cwd();
 var testFixturesPath = path.join(__dirname, 'fixtures');
 var gitDir = 'dot-git';
@@ -15,7 +17,7 @@ describe('git-repo-info', function() {
 
   afterEach(function() {
     process.chdir(root);
-  })
+  });
 
   describe('repo lookup', function() {
     var repoRoot = path.join(testFixturesPath, 'nested-repo');
@@ -52,28 +54,28 @@ describe('git-repo-info', function() {
   describe('repoInfo', function() {
     it('returns an object with repo info', function() {
       var repoRoot = path.join(testFixturesPath, 'nested-repo');
-      var result = repoInfo(path.join(repoRoot, gitDir))
+      var result = repoInfo(path.join(repoRoot, gitDir));
 
       var expected = {
         branch: 'master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: null
-      }
+      };
 
       assert.deepEqual(result, expected);
     });
 
     it('returns an object with repo info', function() {
       var repoRoot = path.join(testFixturesPath, 'detached-head');
-      var result = repoInfo(path.join(repoRoot, gitDir))
+      var result = repoInfo(path.join(repoRoot, gitDir));
 
       var expected = {
         branch: null,
         sha: '9dac893d5a83c02344d91e79dad8904889aeacb1',
         abbreviatedSha: '9dac893d5a',
         tag: null
-      }
+      };
 
       assert.deepEqual(result, expected);
     });
@@ -81,28 +83,28 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info, including the tag (packed tags)', function() {
       var repoRoot = path.join(testFixturesPath, 'tagged-commit-packed');
-      var result = repoInfo(path.join(repoRoot, gitDir))
+      var result = repoInfo(path.join(repoRoot, gitDir));
 
       var expected = {
         branch: 'master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: 'my-tag'
-      }
+      };
 
       assert.deepEqual(result, expected);
     });
 
     it('returns an object with repo info, including the tag (unpacked tags)', function() {
       var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');
-      var result = repoInfo(path.join(repoRoot, gitDir))
+      var result = repoInfo(path.join(repoRoot, gitDir));
 
       var expected = {
         branch: 'master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: 'my-tag'
-      }
+      };
 
       assert.deepEqual(result, expected);
     });

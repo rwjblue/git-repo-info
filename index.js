@@ -34,7 +34,7 @@ function findPackedTag(gitPath, sha) {
   if (fs.existsSync(packedRefsFilePath)) {
     var packedRefsFile = fs.readFileSync(packedRefsFilePath, {encoding: 'utf8'});
     var tagLine = packedRefsFile.split('\n').filter(function(line) {
-      return line.indexOf("refs/tags") > -1 && line.indexOf(sha) > -1;
+      return line.indexOf('refs/tags') > -1 && line.indexOf(sha) > -1;
     })[0];
 
     if (tagLine) {
@@ -68,13 +68,12 @@ module.exports = function(gitPath) {
     abbreviatedSha: null,
     branch: null,
     tag: null
-  }
+  };
 
   try {
     var headFilePath   = path.join(gitPath, 'HEAD');
 
     if (fs.existsSync(headFilePath)) {
-      var branchSHA;
       var headFile = fs.readFileSync(headFilePath, {encoding: 'utf8'});
       var branchName = headFile.split('/').slice(-1)[0].trim();
       var refPath = headFile.split(' ')[1];

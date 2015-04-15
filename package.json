@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/rwjblue/git-repo-info",
   "devDependencies": {
-    "mocha": "^1.21.4"
+    "mocha": "^1.21.4",
+    "mocha-jshint": "^1.1.0"
   }
 }
