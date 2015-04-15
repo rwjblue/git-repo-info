@@ -127,5 +127,19 @@ describe('git-repo-info', function() {
         assert.deepEqual(result, expected);
       });
     }
+
+    it('returns an object with repo info, including the full branch name, if the branch name includes any slashes', function() {
+      var repoRoot = path.join(testFixturesPath, 'branch-with-slashes');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+
+      var expected = {
+        branch: 'feature/branch/with/slashes',
+        sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
+        abbreviatedSha: '5359aabd38',
+        tag: null
+      };
+
+      assert.deepEqual(result, expected);
+    });
   });
 });
