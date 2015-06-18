@@ -49,7 +49,7 @@ function commitForTag(gitPath, tag) {
   var taggedObject = fs.readFileSync(tagPath, { encoding: 'utf8' }).trim();
   var objectPath = path.join(gitPath, 'objects', taggedObject.slice(0, 2), taggedObject.slice(2));
 
-  if (!zlib.inflateSync) {
+  if (!zlib.inflateSync || !fs.existsSync(objectPath)) {
     // we cannot support annotated tags on node v0.10 because
     // zlib does not allow sync access
     return taggedObject;
