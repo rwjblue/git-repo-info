@@ -112,6 +112,20 @@ describe('git-repo-info', function() {
       assert.deepEqual(result, expected);
     });
 
+    it('returns an object with repo info, including the tag (unpacked tags) when a tag object does not exist', function() {
+      var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked-no-object');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+
+      var expected = {
+        branch: 'master',
+        sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
+        abbreviatedSha: 'c1ee41c325',
+        tag: 'awesome-tag'
+      };
+
+      assert.deepEqual(result, expected);
+    });
+
     if (zlib.inflateSync) {
       it('returns an object with repo info, including the tag (annotated tags)', function() {
         var repoRoot = path.join(testFixturesPath, 'tagged-annotated');
