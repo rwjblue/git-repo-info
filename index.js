@@ -89,13 +89,14 @@ function findTag(gitPath, sha) {
 }
 
 module.exports = function(gitPath) {
-  if (!gitPath) { gitPath = findRepo(); }
+  gitPath = findRepo(gitPath);
 
   var result = {
     sha: null,
     abbreviatedSha: null,
     branch: null,
-    tag: null
+    tag: null,
+    root: path.resolve(gitPath, '..')
   };
 
   try {
