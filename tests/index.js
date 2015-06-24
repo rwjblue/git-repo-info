@@ -52,6 +52,13 @@ describe('git-repo-info', function() {
       var foundPath = repoInfo._findRepo();
       assert.equal(foundPath, path.join(repoRoot, gitDir));
     });
+
+    it('finds a repo 2 levels up (without an argument)', function() {
+      process.chdir(path.join(repoRoot, 'foo', 'bar'));
+
+      var foundPath = repoInfo._findRepo();
+      assert.equal(foundPath, path.join(repoRoot, gitDir));
+    });
   });
 
   describe('repoInfo', function() {
@@ -63,7 +70,8 @@ describe('git-repo-info', function() {
         branch: 'master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
-        tag: null
+        tag: null,
+        root: repoRoot
       };
 
       assert.deepEqual(result, expected);
@@ -77,7 +85,8 @@ describe('git-repo-info', function() {
         branch: null,
         sha: '9dac893d5a83c02344d91e79dad8904889aeacb1',
         abbreviatedSha: '9dac893d5a',
-        tag: null
+        tag: null,
+        root: repoRoot
       };
 
       assert.deepEqual(result, expected);
@@ -92,7 +101,8 @@ describe('git-repo-info', function() {
         branch: 'master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
-        tag: 'my-tag'
+        tag: 'my-tag',
+        root: repoRoot
       };
 
       assert.deepEqual(result, expected);
@@ -106,7 +116,8 @@ describe('git-repo-info', function() {
         branch: 'master',
         sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
         abbreviatedSha: 'c1ee41c325',
-        tag: 'awesome-tag'
+        tag: 'awesome-tag',
+        root: repoRoot
       };
 
       assert.deepEqual(result, expected);
@@ -120,7 +131,8 @@ describe('git-repo-info', function() {
         branch: 'master',
         sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
         abbreviatedSha: 'c1ee41c325',
-        tag: 'awesome-tag'
+        tag: 'awesome-tag',
+        root: repoRoot
       };
 
       assert.deepEqual(result, expected);
@@ -135,7 +147,8 @@ describe('git-repo-info', function() {
           branch: 'master',
           sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
           abbreviatedSha: 'c1ee41c325',
-          tag: 'awesome-tag'
+          tag: 'awesome-tag',
+          root: repoRoot
         };
 
         assert.deepEqual(result, expected);
@@ -150,10 +163,25 @@ describe('git-repo-info', function() {
         branch: 'feature/branch/with/slashes',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
-        tag: null
+        tag: null,
+        root: repoRoot
       };
 
       assert.deepEqual(result, expected);
     });
+  });
+
+  describe('repoInfo().root', function() {
+    var repoRoot = path.join(testFixturesPath, 'nested-repo');
+
+    it('finds a repo from cwd (2 levels up)', function() {
+      process.chdir(path.join(repoRoot, 'foo', 'bar'));
+      assert.equal(repoInfo().root, repoRoot);
+    });
+
+    it('finds a repo with an argument', function() {
+      assert.equal(repoInfo(path.join(repoRoot, 'foo', 'bar')).root, repoRoot);
+    });
+
   });
 });
