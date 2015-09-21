@@ -10,15 +10,28 @@ function changeGitDir(newDirName) {
   GIT_DIR = newDirName;
 }
 
+function get_line(filename, line_no) {
+    var data = fs.readFileSync(filename, 'utf8');
+    var lines = data.split("\n");
+
+    if(+line_no > lines.length){
+      throw new Error('File end reached without finding line');
+    }
+    return lines[+line_no];
+}
+
 function findRepo(startingPath) {
-  var gitPath, lastPath;
+  var gitPath, lastPath, submodule_path;
   var currentPath = startingPath;
 
   if (!currentPath) { currentPath = process.cwd(); }
 
   do {
     gitPath = path.join(currentPath, GIT_DIR);
-
+    if(fs.statSync(gitPath).isFile()) {
+      submodule_path = get_line(gitPath, 0);
+      return path.join(currentPath, submodule_path.split("gitdir: ").pop())
+    }
     if (fs.existsSync(gitPath)) {
       return gitPath;
     }
