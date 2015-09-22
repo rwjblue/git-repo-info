@@ -10,29 +10,30 @@ function changeGitDir(newDirName) {
   GIT_DIR = newDirName;
 }
 
-function get_line(filename, line_no) {
+function getLine(filename, lineNo) {
     var data = fs.readFileSync(filename, 'utf8');
-    var lines = data.split("\n");
+    var lines = data.split('\n');
 
-    if(+line_no > lines.length){
+    if(+lineNo > lines.length){
       throw new Error('File end reached without finding line');
     }
-    return lines[+line_no];
+    return lines[+lineNo];
 }
 
 function findRepo(startingPath) {
-  var gitPath, lastPath, submodule_path;
+  var gitPath, lastPath, submodulePath;
   var currentPath = startingPath;
 
   if (!currentPath) { currentPath = process.cwd(); }
 
   do {
     gitPath = path.join(currentPath, GIT_DIR);
-    if(fs.statSync(gitPath).isFile()) {
-      submodule_path = get_line(gitPath, 0);
-      return path.join(currentPath, submodule_path.split("gitdir: ").pop())
-    }
     if (fs.existsSync(gitPath)) {
+      var submodule = isSubModule(gitPath);
+      if(submodule) {
+        submodulePath = getLine(gitPath, 0);
+        return path.join(currentPath, submodulePath.split('gitdir: ').pop());
+      }
       return gitPath;
     }
 
@@ -101,15 +102,21 @@ function findTag(gitPath, sha) {
   }
 }
 
-module.exports = function(gitPath) {
-  gitPath = findRepo(gitPath);
+function isSubModule(gitPath){
+  return fs.statSync(gitPath).isFile();
+}
+
+module.exports = function(root) {
+  if (!root) { root = process.cwd(); }
+  var gitPath = findRepo(root),
+    submodule = isSubModule(root);
 
   var result = {
     sha: null,
     abbreviatedSha: null,
     branch: null,
     tag: null,
-    root: path.resolve(gitPath, '..')
+    root: path.resolve(submodule ? root : gitPath, '..')
   };
 
   try {

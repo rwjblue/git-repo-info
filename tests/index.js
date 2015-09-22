@@ -169,6 +169,21 @@ describe('git-repo-info', function() {
 
       assert.deepEqual(result, expected);
     });
+
+    it('returns an object with repo info for submodule repos', function() {
+      var repoRoot = path.join(testFixturesPath, 'submodule-repo/foo');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+      var expected = {
+        branch: 'master',
+        sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
+        abbreviatedSha: '5359aabd38',
+        tag: null,
+        root: repoRoot
+      };
+
+      assert.deepEqual(result, expected);
+    });
+
   });
 
   describe('repoInfo().root', function() {
@@ -181,6 +196,11 @@ describe('git-repo-info', function() {
 
     it('finds a repo with an argument', function() {
       assert.equal(repoInfo(path.join(repoRoot, 'foo', 'bar')).root, repoRoot);
+    });
+
+    it('finds a repo root for submodule', function() {
+      var gitPath  = path.join(testFixturesPath, 'submodule-repo');
+      assert.equal(repoInfo(path.join(gitPath, 'foo', gitDir)).root, path.join(gitPath, 'foo'));
     });
 
   });
