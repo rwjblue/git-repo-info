@@ -68,6 +68,7 @@ describe('git-repo-info', function() {
 
       var expected = {
         branch: 'master',
+        ref: 'refs/heads/master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: null,
@@ -83,6 +84,7 @@ describe('git-repo-info', function() {
 
       var expected = {
         branch: null,
+        ref: null,
         sha: '9dac893d5a83c02344d91e79dad8904889aeacb1',
         abbreviatedSha: '9dac893d5a',
         tag: null,
@@ -92,13 +94,13 @@ describe('git-repo-info', function() {
       assert.deepEqual(result, expected);
     });
 
-
     it('returns an object with repo info, including the tag (packed tags)', function() {
       var repoRoot = path.join(testFixturesPath, 'tagged-commit-packed');
       var result = repoInfo(path.join(repoRoot, gitDir));
 
       var expected = {
         branch: 'master',
+        ref: 'refs/heads/master',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: 'my-tag',
@@ -114,6 +116,7 @@ describe('git-repo-info', function() {
 
       var expected = {
         branch: 'master',
+        ref: 'refs/heads/master',
         sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
         abbreviatedSha: 'c1ee41c325',
         tag: 'awesome-tag',
@@ -129,6 +132,7 @@ describe('git-repo-info', function() {
 
       var expected = {
         branch: 'master',
+        ref: 'refs/heads/master',
         sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
         abbreviatedSha: 'c1ee41c325',
         tag: 'awesome-tag',
@@ -145,6 +149,7 @@ describe('git-repo-info', function() {
 
         var expected = {
           branch: 'master',
+          ref: 'refs/heads/master',
           sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
           abbreviatedSha: 'c1ee41c325',
           tag: 'awesome-tag',
@@ -161,6 +166,7 @@ describe('git-repo-info', function() {
 
       var expected = {
         branch: 'feature/branch/with/slashes',
+        ref: 'refs/heads/feature/branch/with/slashes',
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: null,

@@ -95,6 +95,7 @@ module.exports = function(gitPath) {
     sha: null,
     abbreviatedSha: null,
     branch: null,
+    ref: null,
     tag: null,
     root: path.resolve(gitPath, '..')
   };
@@ -112,9 +113,11 @@ module.exports = function(gitPath) {
 
       // Find branch and SHA
       if (refPath) {
-        var branchPath = path.join(gitPath, refPath.trim());
+        refPath = refPath.trim();  
+        var branchPath = path.join(gitPath, refPath);
 
         result.branch  = branchName;
+        result.ref = refPath;
         result.sha     = fs.readFileSync(branchPath, {encoding: 'utf8' }).trim();
       } else {
         result.sha = branchName;

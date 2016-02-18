@@ -10,9 +10,11 @@ var getRepoInfo = require('git-repo-info');
 var info = getRepoInfo();
 
 info.branch         //=> will be the current branch
+info.ref         //=> will be the current ref
 info.sha            //=> will be the current sha
 info.abbreviatedSha //=> will be the first 10 chars of the current sha
 info.tag            //=> will be the tag for the current sha (or `null` if no tag exists)
+info.root            //=> will be the repository root folder
 ```
 
 When called without any arguments, `git-repo-info` will automatically lookup upwards
