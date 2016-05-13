@@ -44,6 +44,20 @@ function findPackedTag(gitPath, sha) {
   }
 }
 
+function findPackedCommit(gitPath, refPath) {
+  var packedRefsFilePath = path.join(gitPath, 'packed-refs');
+  if (fs.existsSync(packedRefsFilePath)) {
+    var packedRefsFile = fs.readFileSync(packedRefsFilePath, { encoding: 'utf8' });
+    var shaLine = packedRefsFile.split('\n').filter(function(line) {
+      return line.indexOf('refs/heads') > -1 && line.indexOf(refPath) > -1;
+    })[0];
+
+    if (shaLine) {
+      return shaLine.split(' ')[0];
+    }
+  }
+}
+
 function commitForTag(gitPath, tag) {
   var tagPath = path.join(gitPath, 'refs', 'tags', tag);
   var taggedObject = fs.readFileSync(tagPath, { encoding: 'utf8' }).trim();
@@ -112,10 +126,18 @@ module.exports = function(gitPath) {
 
       // Find branch and SHA
       if (refPath) {
-        var branchPath = path.join(gitPath, refPath.trim());
+        refPath = refPath.trim();
+        var branchPath = path.join(gitPath, refPath);
 
         result.branch  = branchName;
-        result.sha     = fs.readFileSync(branchPath, {encoding: 'utf8' }).trim();
+        try {
+          result.sha = fs.readFileSync(branchPath, { encoding: 'utf8' }).trim();
+        } catch (err) {
+          if (err.code === 'ENOENT') {
+            console.log('Could not find ' + branchPath + ' trying to find ref in packed-refs instead.');
+            result.sha = findPackedCommit(gitPath, refPath);
+          }
+        }
       } else {
         result.sha = branchName;
       }
