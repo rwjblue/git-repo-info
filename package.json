@@ -4,7 +4,9 @@
   "description": "Retrieve current sha and branch name from a git repo.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests"
+    "test": "mocha tests",
+    "preversion": "npm test",
+    "postversion": "git push && git push --tags && npm publish"
   },
   "repository": {
     "type": "git",
