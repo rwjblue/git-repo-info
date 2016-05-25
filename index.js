@@ -30,32 +30,46 @@ function findRepo(startingPath) {
   return null;
 }
 
-function findPackedTag(gitPath, sha) {
+function findPackedTag(gitPath, refPath) {
+  return getPackedRefsForType(gitPath, refPath, 'tag');
+}
+
+function findPackedCommit(gitPath, refPath) {
+  return getPackedRefsForType(gitPath, refPath, 'commit');
+}
+
+function getPackedRefsForType(gitPath, refPath, type) {
   var packedRefsFilePath = path.join(gitPath, 'packed-refs');
   if (fs.existsSync(packedRefsFilePath)) {
-    var packedRefsFile = fs.readFileSync(packedRefsFilePath, {encoding: 'utf8'});
-    var tagLine = packedRefsFile.split('\n').filter(function(line) {
-      return line.indexOf('refs/tags') > -1 && line.indexOf(sha) > -1;
-    })[0];
+    var packedRefsFile = fs.readFileSync(packedRefsFilePath, { encoding: 'utf8' });
+    var shaLine = getLineForRefPath(packedRefsFile, type, refPath);
 
-    if (tagLine) {
-      return tagLine.split('tags/')[1];
+    if (shaLine) {
+      return getShaBasedOnType(type, shaLine);
     }
   }
 }
 
-function findPackedCommit(gitPath, refPath) {
-  var packedRefsFilePath = path.join(gitPath, 'packed-refs');
-  if (fs.existsSync(packedRefsFilePath)) {
-    var packedRefsFile = fs.readFileSync(packedRefsFilePath, { encoding: 'utf8' });
-    var shaLine = packedRefsFile.split('\n').filter(function(line) {
-      return line.indexOf('refs/heads') > -1 && line.indexOf(refPath) > -1;
-    })[0];
+function getLineForRefPath(packedRefsFile, type, refPath) {
+  return packedRefsFile.split('\n').filter(function(line) {
+    return doesLineMatchRefPath(type, line, refPath);
+  })[0];
+}
 
-    if (shaLine) {
-      return shaLine.split(' ')[0];
-    }
+function doesLineMatchRefPath(type, line, refPath) {
+  var refPrefix = type === 'tag' ? 'refs/tags' : 'refs/heads';
+  return line.indexOf(refPrefix) > -1 && line.indexOf(refPath) > -1;
+}
+
+function getShaBasedOnType(type, shaLine) {
+  var shaResult = '';
+  if (type === 'tag') {
+    shaResult = shaLine.split('tags/')[1];
+  } else if (type === 'commit') {
+    shaResult = shaLine.split(' ')[0];
   }
+
+  return shaResult;
 }
 
 function commitForTag(gitPath, tag) {
@@ -71,7 +85,8 @@ function commitForTag(gitPath, tag) {
 
   var objectContents = zlib.inflateSync(fs.readFileSync(objectPath)).toString();
 
-  // 'tag 172\u0000object c1ee41c325d54f410b133e0018c7a6b1316f6cda\ntype commit\ntag awesome-tag\ntagger Robert Jackson <robert.w.jackson@me.com> 1429100021 -0400\n\nI am making an annotated tag.\n'
+  // 'tag 172\u0000object c1ee41c325d54f410b133e0018c7a6b1316f6cda\ntype commit\ntag awesome-tag\ntagger Robert Jackson
+  // <robert.w.jackson@me.com> 1429100021 -0400\n\nI am making an annotated tag.\n'
   if (objectContents.slice(0,3) === 'tag') {
     var sections = objectContents.split(/\0|\n/);
     var sha = sections[1].slice(7);
@@ -130,13 +145,10 @@ module.exports = function(gitPath) {
         var branchPath = path.join(gitPath, refPath);
 
         result.branch  = branchName;
-        try {
+        if (fs.existsSync(branchPath)) {
           result.sha = fs.readFileSync(branchPath, { encoding: 'utf8' }).trim();
-        } catch (err) {
-          if (err.code === 'ENOENT') {
-            console.log('Could not find ' + branchPath + ' trying to find ref in packed-refs instead.');
-            result.sha = findPackedCommit(gitPath, refPath);
-          }
+        } else {
+          result.sha = findPackedCommit(gitPath, refPath);
         }
       } else {
         result.sha = branchName;
