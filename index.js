@@ -125,10 +125,14 @@ module.exports = function(gitPath) {
     abbreviatedSha: null,
     branch: null,
     tag: null,
-    root: path.resolve(gitPath, '..')
+    root: null
   };
 
+  if (!gitPath) { return result; }
+
   try {
+    result.root = path.resolve(gitPath, '..');
+
     var headFilePath   = path.join(gitPath, 'HEAD');
 
     if (fs.existsSync(headFilePath)) {
