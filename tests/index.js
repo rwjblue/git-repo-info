@@ -71,6 +71,11 @@ describe('git-repo-info', function() {
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: null,
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
         root: repoRoot
       };
 
@@ -86,6 +91,11 @@ describe('git-repo-info', function() {
         sha: '9dac893d5a83c02344d91e79dad8904889aeacb1',
         abbreviatedSha: '9dac893d5a',
         tag: null,
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
         root: repoRoot
       };
 
@@ -101,6 +111,11 @@ describe('git-repo-info', function() {
         sha: 'd670460b4b4aece5915caf5c68d12f560a9fe3e4',
         abbreviatedSha: 'd670460b4b',
         tag: null,
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
         root: repoRoot
       };
 
@@ -116,26 +131,58 @@ describe('git-repo-info', function() {
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: 'my-tag',
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
         root: repoRoot
       };
 
       assert.deepEqual(result, expected);
     });
 
-    it('returns an object with repo info, including the tag (unpacked tags)', function() {
-      var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+    if (zlib.inflateSync) {
+      it('returns an object with repo info, including the tag (unpacked tags)', function() {
+        var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');
+        var result = repoInfo(path.join(repoRoot, gitDir));
 
-      var expected = {
-        branch: 'master',
-        sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
-        abbreviatedSha: 'c1ee41c325',
-        tag: 'awesome-tag',
-        root: repoRoot
-      };
+        var expected = {
+          branch: 'master',
+          sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
+          abbreviatedSha: 'c1ee41c325',
+          tag: 'awesome-tag',
+          committer: 'Robert Jackson <robert.w.jackson@me.com>',
+          committerDate: '2015-04-15T12:10:06.000Z',
+          author: 'Robert Jackson <robert.w.jackson@me.com>',
+          authorDate: '2015-04-15T12:10:06.000Z',
+          commitMessage: 'Initial commit.',
+          root: repoRoot
+        };
 
-      assert.deepEqual(result, expected);
-    });
+        assert.deepEqual(result, expected);
+      });
+    } else {
+      it('returns an object with repo info, including the tag (unpacked tags)', function() {
+        var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');
+        var result = repoInfo(path.join(repoRoot, gitDir));
+
+        var expected = {
+          branch: 'master',
+          sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
+          abbreviatedSha: 'c1ee41c325',
+          tag: 'awesome-tag',
+          committer: null,
+          committerDate: null,
+          author: null,
+          authorDate: null,
+          commitMessage: null,
+          root: repoRoot
+        };
+
+        assert.deepEqual(result, expected);
+      });
+    }
 
     it('returns an object with repo info, including the tag (unpacked tags) when a tag object does not exist', function() {
       var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked-no-object');
@@ -146,6 +193,11 @@ describe('git-repo-info', function() {
         sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
         abbreviatedSha: 'c1ee41c325',
         tag: 'awesome-tag',
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
         root: repoRoot
       };
 
@@ -162,6 +214,11 @@ describe('git-repo-info', function() {
           sha: 'c1ee41c325d54f410b133e0018c7a6b1316f6cda',
           abbreviatedSha: 'c1ee41c325',
           tag: 'awesome-tag',
+          committer: 'Robert Jackson <robert.w.jackson@me.com>',
+          committerDate: '2015-04-15T12:10:06.000Z',
+          author: 'Robert Jackson <robert.w.jackson@me.com>',
+          authorDate: '2015-04-15T12:10:06.000Z',
+          commitMessage: 'Initial commit.',
           root: repoRoot
         };
 
@@ -178,6 +235,11 @@ describe('git-repo-info', function() {
         sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
         abbreviatedSha: '5359aabd38',
         tag: null,
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
         root: repoRoot
       };
 
