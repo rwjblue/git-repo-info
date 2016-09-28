@@ -125,6 +125,11 @@ module.exports = function(gitPath) {
     abbreviatedSha: null,
     branch: null,
     tag: null,
+    committer: null,
+    committerDate: null,
+    author: null,
+    authorDate: null,
+    commitMessage: null,
     root: null
   };
 
@@ -160,6 +165,15 @@ module.exports = function(gitPath) {
 
       result.abbreviatedSha = result.sha.slice(0,10);
 
+      // Find commit data
+      var commitData = getCommitData(gitPath, result.sha);
+      if (commitData) {
+        result = Object.keys(commitData).reduce(function(r, key) {
+          result[key] = commitData[key];
+          return result;
+        }, result);
+      }
+
       // Find tag
       var tag = findTag(gitPath, result.sha);
       if (tag) {
@@ -180,3 +194,49 @@ module.exports = function(gitPath) {
 module.exports._suppressErrors = true;
 module.exports._findRepo     = findRepo;
 module.exports._changeGitDir = changeGitDir;
+
+function getCommitData(gitPath, sha) {
+  var objectPath = path.join(gitPath, 'objects', sha.slice(0, 2), sha.slice(2));
+
+  if (zlib.inflateSync && fs.existsSync(objectPath)) {
+    var objectContents = zlib.inflateSync(fs.readFileSync(objectPath)).toString();
+
+    return objectContents.split(/\0|\n/)
+      .filter(function(item) {
+        return !!item;
+      })
+      .reduce(function(data, section) {
+        var part = section.slice(0, section.indexOf(' ')).trim();
+
+        switch(part) {
+          case 'commit':
+          case 'tag':
+          case 'object':
+          case 'type':
+          case 'tree':
+          case 'parent':
+            //ignore these for now
+            break;
+          case 'author':
+          case 'committer':
+            var parts = section.match(/^(?:author|committer)\s(.+)\s(\d+\s(?:\+|\-)\d{4})$/);
+
+            if (parts) {
+              data[part] = parts[1];
+              data[part + 'Date'] = parseDate(parts[2]);
+            }
+            break;
+          default:
+            //should just be the commit message left
+            data.commitMessage = section;
+        }
+
+        return data;
+      }, {});
+  }
+}
+
+function parseDate(d) {
+  var epoch = d.split(' ')[0];
+  return new Date(epoch * 1000).toISOString();
+}
