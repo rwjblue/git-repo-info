@@ -10,6 +10,29 @@ function changeGitDir(newDirName) {
   GIT_DIR = newDirName;
 }
 
+function findRepoHandleLinkedWorktree(gitPath) {
+  var stat = fs.statSync(gitPath);
+  if (stat.isDirectory()) {
+    return {
+      // for the base (non-linked) dir, there is no distinction between where we
+      // find the HEAD file and where we find the rest of .git
+      worktreeGitDir: gitPath,
+      commonGitDir: gitPath,
+    };
+  } else {
+    var linkedGitDir = fs.readFileSync(gitPath).toString();
+    var worktreeGitDir = /gitdir: (.*)/.exec(linkedGitDir)[1];
+    var commonDirPath = path.join(worktreeGitDir, 'commondir');
+    var commonDirRelative = fs.readFileSync(commonDirPath).toString().replace(/\r?\n$/, '');
+    var commonDir = path.resolve(path.join(worktreeGitDir, commonDirRelative));
+
+    return {
+      worktreeGitDir: path.resolve(worktreeGitDir),
+      commonGitDir: commonDir,
+    };
+  }
+}
+
 function findRepo(startingPath) {
   var gitPath, lastPath;
   var currentPath = startingPath;
@@ -20,7 +43,7 @@ function findRepo(startingPath) {
     gitPath = path.join(currentPath, GIT_DIR);
 
     if (fs.existsSync(gitPath)) {
-      return gitPath;
+      return findRepoHandleLinkedWorktree(gitPath);
     }
 
     lastPath = currentPath;
@@ -118,7 +141,7 @@ function findTag(gitPath, sha) {
 }
 
 module.exports = function(gitPath) {
-  gitPath = findRepo(gitPath);
+  var gitPathInfo = findRepo(gitPath);
 
   var result = {
     sha: null,
@@ -133,12 +156,12 @@ module.exports = function(gitPath) {
     root: null
   };
 
-  if (!gitPath) { return result; }
+  if (!gitPathInfo) { return result; }
 
   try {
-    result.root = path.resolve(gitPath, '..');
+    result.root = path.resolve(gitPathInfo.commonGitDir, '..');
 
-    var headFilePath   = path.join(gitPath, 'HEAD');
+    var headFilePath   = path.join(gitPathInfo.worktreeGitDir, 'HEAD');
 
     if (fs.existsSync(headFilePath)) {
       var headFile = fs.readFileSync(headFilePath, {encoding: 'utf8'});
@@ -151,13 +174,13 @@ module.exports = function(gitPath) {
       // Find branch and SHA
       if (refPath) {
         refPath = refPath.trim();
-        var branchPath = path.join(gitPath, refPath);
+        var branchPath = path.join(gitPathInfo.commonGitDir, refPath);
 
         result.branch  = branchName;
         if (fs.existsSync(branchPath)) {
           result.sha = fs.readFileSync(branchPath, { encoding: 'utf8' }).trim();
         } else {
-          result.sha = findPackedCommit(gitPath, refPath);
+          result.sha = findPackedCommit(gitPathInfo.commonGitDir, refPath);
         }
       } else {
         result.sha = branchName;
@@ -166,7 +189,7 @@ module.exports = function(gitPath) {
       result.abbreviatedSha = result.sha.slice(0,10);
 
       // Find commit data
-      var commitData = getCommitData(gitPath, result.sha);
+      var commitData = getCommitData(gitPathInfo.commonGitDir, result.sha);
       if (commitData) {
         result = Object.keys(commitData).reduce(function(r, key) {
           result[key] = commitData[key];
@@ -175,7 +198,7 @@ module.exports = function(gitPath) {
       }
 
       // Find tag
-      var tag = findTag(gitPath, result.sha);
+      var tag = findTag(gitPathInfo.commonGitDir, result.sha);
       if (tag) {
         result.tag = tag;
       }
