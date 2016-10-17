@@ -28,36 +28,61 @@ describe('git-repo-info', function() {
     it('finds a repo in the current directory', function() {
       process.chdir(repoRoot);
 
-      var foundPath = repoInfo._findRepo(repoRoot);
-      assert.equal(foundPath, path.join(repoRoot, gitDir));
+      var foundPathInfo = repoInfo._findRepo(repoRoot);
+      assert.deepEqual(foundPathInfo, {
+        worktreeGitDir: path.join(repoRoot, gitDir),
+        commonGitDir: path.join(repoRoot, gitDir),
+      });
     });
 
     it('finds a repo in the parent directory', function() {
       process.chdir(path.join(repoRoot, 'foo'));
 
-      var foundPath = repoInfo._findRepo(repoRoot);
-      assert.equal(foundPath, path.join(repoRoot, gitDir));
+      var foundPathInfo = repoInfo._findRepo(repoRoot);
+      assert.deepEqual(foundPathInfo, {
+        worktreeGitDir: path.join(repoRoot, gitDir),
+        commonGitDir: path.join(repoRoot, gitDir),
+      });
     });
 
     it('finds a repo 2 levels up', function() {
       process.chdir(path.join(repoRoot, 'foo', 'bar'));
 
-      var foundPath = repoInfo._findRepo(repoRoot);
-      assert.equal(foundPath, path.join(repoRoot, gitDir));
+      var foundPathInfo = repoInfo._findRepo(repoRoot);
+      assert.deepEqual(foundPathInfo, {
+        worktreeGitDir: path.join(repoRoot, gitDir),
+        commonGitDir: path.join(repoRoot, gitDir),
+      });
     });
 
     it('finds a repo without an argument', function() {
       process.chdir(repoRoot);
 
-      var foundPath = repoInfo._findRepo();
-      assert.equal(foundPath, path.join(repoRoot, gitDir));
+      var foundPathInfo = repoInfo._findRepo();
+      assert.deepEqual(foundPathInfo, {
+        worktreeGitDir: path.join(repoRoot, gitDir),
+        commonGitDir: path.join(repoRoot, gitDir),
+      });
     });
 
     it('finds a repo 2 levels up (without an argument)', function() {
       process.chdir(path.join(repoRoot, 'foo', 'bar'));
 
-      var foundPath = repoInfo._findRepo();
-      assert.equal(foundPath, path.join(repoRoot, gitDir));
+      var foundPathInfo = repoInfo._findRepo();
+      assert.deepEqual(foundPathInfo, {
+        worktreeGitDir: path.join(repoRoot, gitDir),
+        commonGitDir: path.join(repoRoot, gitDir),
+      });
+    });
+
+    it('finds a repo via a linked worktree', function() {
+      process.chdir(path.join(testFixturesPath, 'linked-worktree', 'linked'));
+
+      var foundPathInfo = repoInfo._findRepo();
+      assert.deepEqual(foundPathInfo, {
+        worktreeGitDir: path.join(testFixturesPath, 'linked-worktree', 'dot-git', 'worktrees', 'linked'),
+        commonGitDir: path.join(testFixturesPath, 'linked-worktree', 'dot-git'),
+      });
     });
   });
 
