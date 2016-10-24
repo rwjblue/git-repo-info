@@ -23,8 +23,9 @@ function findRepoHandleLinkedWorktree(gitPath) {
     var linkedGitDir = fs.readFileSync(gitPath).toString();
     var worktreeGitDir = /gitdir: (.*)/.exec(linkedGitDir)[1];
     var commonDirPath = path.join(worktreeGitDir, 'commondir');
-    var commonDirRelative = fs.readFileSync(commonDirPath).toString().replace(/\r?\n$/, '');
-    var commonDir = path.resolve(path.join(worktreeGitDir, commonDirRelative));
+    var commonDirRelative = fs.existsSync(commonDirPath) &&
+                          fs.readFileSync(commonDirPath).toString().replace(/\r?\n$/, '');
+    var commonDir = commonDirPath && path.resolve(path.join(worktreeGitDir, commonDirRelative));
 
     return {
       worktreeGitDir: path.resolve(worktreeGitDir),
