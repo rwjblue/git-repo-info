@@ -270,6 +270,26 @@ describe('git-repo-info', function() {
 
       assert.deepEqual(result, expected);
     });
+
+    it('returns an object with repo info for linked worktrees', function() {
+      process.chdir(path.join(testFixturesPath, 'linked-worktree', 'linked'));
+      var result = repoInfo();
+
+      var expected = {
+        branch: null,
+        sha: '409372f3bd07c11bfacee3963f48571d675268d7',
+        abbreviatedSha: '409372f3bd',
+        tag: null,
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
+        root: path.join(testFixturesPath, 'linked-worktree')
+      };
+
+      assert.deepEqual(result, expected);
+    });
   });
 
   describe('repoInfo().root', function() {
