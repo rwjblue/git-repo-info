@@ -23,7 +23,6 @@ function findRepoHandleLinkedWorktree(gitPath) {
     // We have a file that tells us where to find the worktree git dir.  Once we
     // look there we'll know how to find the common git dir, depending on
     // whether it's a linked worktree git dir, or a submodule dir
-
     var linkedGitDir = fs.readFileSync(gitPath).toString();
     var worktreeGitDirUnresolved = /gitdir: (.*)/.exec(linkedGitDir)[1];
     var worktreeGitDir = path.resolve(worktreeGitDirUnresolved);
@@ -50,7 +49,7 @@ function findRepoHandleLinkedWorktree(gitPath) {
 }
 
 function findRepo(startingPath) {
-  var gitPath, lastPath;
+  var gitPath, lastPath, submodulePath;
   var currentPath = startingPath;
 
   if (!currentPath) { currentPath = process.cwd(); }
@@ -59,6 +58,11 @@ function findRepo(startingPath) {
     gitPath = path.join(currentPath, GIT_DIR);
 
     if (fs.existsSync(gitPath)) {
+      var submodule = isSubModule(gitPath);
+      if(submodule) {
+        submodulePath = findRepoHandleLinkedWorktree(gitPath);
+        gitPath = submodulePath.worktreeGitDir;
+      }
       return findRepoHandleLinkedWorktree(gitPath);
     }
 
@@ -67,6 +71,10 @@ function findRepo(startingPath) {
   } while (lastPath !== currentPath);
 
   return null;
+}
+
+function isSubModule(gitPath){
+  return fs.statSync(gitPath).isFile() && fs.readFileSync(gitPath).toString().indexOf('/modules/') > 0;
 }
 
 function findPackedTag(gitPath, refPath) {

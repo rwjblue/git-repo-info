@@ -323,6 +323,26 @@ describe('git-repo-info', function() {
 
       assert.deepEqual(result, expected);
     });
+
+    it('returns an object with repo info for submodule repos', function() {
+      process.chdir(path.join(testFixturesPath, 'submodule-repo', 'foo'));
+      var repoRoot = path.join(testFixturesPath, 'submodule-repo/foo');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+      var expected = {
+        sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
+        abbreviatedSha: '5359aabd38',
+        branch: 'master',
+        tag: null,
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
+        root: '/Users/pratheepv/freshteam/source/git-repo-info/tests/fixtures/submodule-repo/dot-git/modules'
+      };
+
+      assert.deepEqual(result, expected);
+    });
   });
 
   describe('repoInfo().root', function() {
