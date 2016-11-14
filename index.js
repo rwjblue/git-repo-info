@@ -20,18 +20,31 @@ function findRepoHandleLinkedWorktree(gitPath) {
       commonGitDir: gitPath,
     };
   } else {
-    process.cwd(gitPath);
+    // We have a file that tells us where to find the worktree git dir.  Once we
+    // look there we'll know how to find the common git dir, depending on
+    // whether it's a linked worktree git dir, or a submodule dir
     var linkedGitDir = fs.readFileSync(gitPath).toString();
-    var worktreeGitDir = /gitdir: (.*)/.exec(linkedGitDir)[1];
+    var worktreeGitDirUnresolved = /gitdir: (.*)/.exec(linkedGitDir)[1];
+    var worktreeGitDir = path.resolve(worktreeGitDirUnresolved);
     var commonDirPath = path.join(worktreeGitDir, 'commondir');
-    console.log(process.argv[1]);
-    var commonDirRelative = fs.readFileSync(commonDirPath).toString().replace(/\r?\n$/, '');
-    var commonDir = path.resolve(path.join(worktreeGitDir, commonDirRelative));
+    if (fs.existsSync(commonDirPath)) {
+      // this directory contains a `commondir` file; we're within a linked
+      // worktree
 
-    return {
-      worktreeGitDir: path.resolve(worktreeGitDir),
-      commonGitDir: commonDir,
-    };
+      var commonDirRelative = fs.readFileSync(commonDirPath).toString().replace(/\r?\n$/, '');
+      var commonDir = path.resolve(path.join(worktreeGitDir, commonDirRelative));
+
+      return {
+        worktreeGitDir: worktreeGitDir,
+        commonGitDir: commonDir,
+      };
+    } else {
+      // there is no `commondir` file; we're in a submodule
+      return {
+        worktreeGitDir: worktreeGitDir,
+        commonGitDir: worktreeGitDir,
+      };
+    }
   }
 }
 
