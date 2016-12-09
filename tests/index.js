@@ -177,6 +177,26 @@ describe('git-repo-info', function() {
       assert.deepEqual(result, expected);
     });
 
+    it('returns an object with repo info, including the tag (packed annotated tag)', function() {
+      var repoRoot = path.join(testFixturesPath, 'tagged-commit-packed-annotated');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+
+      var expected = {
+        branch: 'master',
+        sha: '5359aabd3872d9ffd160712e9615c5592dfe6745',
+        abbreviatedSha: '5359aabd38',
+        tag: 'example-annotated-tag',
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
+        root: repoRoot
+      };
+
+      assert.deepEqual(result, expected);
+    });
+
     if (zlib.inflateSync) {
       it('returns an object with repo info, including the tag (unpacked tags)', function() {
         var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');

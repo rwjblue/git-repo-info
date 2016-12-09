@@ -90,14 +90,19 @@ function getPackedRefsForType(gitPath, refPath, type) {
 }
 
 function getLineForRefPath(packedRefsFile, type, refPath) {
-  return packedRefsFile.split('\n').filter(function(line) {
-    return doesLineMatchRefPath(type, line, refPath);
-  })[0];
+  return getLinesForRefPath(packedRefsFile, type, refPath)[0];
+}
+
+function getLinesForRefPath(packedRefsFile, type, refPath) {
+  return packedRefsFile.split('\n').reduce(function(acc, line, idx, arr) {
+    var targetLine = line.indexOf('^') > -1 ? arr[idx-1] : line;
+    return doesLineMatchRefPath(type, line, refPath) ? acc.concat(targetLine) : acc;
+  }, []);
 }
 
 function doesLineMatchRefPath(type, line, refPath) {
   var refPrefix = type === 'tag' ? 'refs/tags' : 'refs/heads';
-  return line.indexOf(refPrefix) > -1 && line.indexOf(refPath) > -1;
+  return (line.indexOf(refPrefix) > -1 || line.indexOf('^') > -1) && line.indexOf(refPath) > -1;
 }
 
 function getShaBasedOnType(type, shaLine) {
