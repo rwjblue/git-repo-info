@@ -259,6 +259,18 @@ describe('git-repo-info', function() {
       assert.deepEqual(result, expected);
     });
 
+    it('returns an object with repo info, including the tag (deterministic alpha sort)', function() {
+      var repoRoot = path.join(testFixturesPath, 'tagged-commit-mixed-packing');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+
+      var expected = {
+        sha: '37ece7ad9ded5f2312bb6be8d0c21ecebca088ac',
+        tag: '0-lightweight-tag',
+      };
+
+      assert.deepEqual({ sha: result.sha, tag: result.tag }, expected);
+    });
+
     if (zlib.inflateSync) {
       it('returns an object with repo info, including the tag (annotated tags)', function() {
         var repoRoot = path.join(testFixturesPath, 'tagged-annotated');

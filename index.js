@@ -69,28 +69,27 @@ function findRepo(startingPath) {
   return null;
 }
 
-function findPackedTag(gitPath, refPath) {
+function findPackedTags(gitPath, refPath) {
   return getPackedRefsForType(gitPath, refPath, 'tag');
 }
 
 function findPackedCommit(gitPath, refPath) {
-  return getPackedRefsForType(gitPath, refPath, 'commit');
+  return getPackedRefsForType(gitPath, refPath, 'commit')[0];
 }
 
 function getPackedRefsForType(gitPath, refPath, type) {
-  var packedRefsFilePath = path.join(gitPath, 'packed-refs');
-  if (fs.existsSync(packedRefsFilePath)) {
-    var packedRefsFile = fs.readFileSync(packedRefsFilePath, { encoding: 'utf8' });
-    var shaLine = getLineForRefPath(packedRefsFile, type, refPath);
-
-    if (shaLine) {
+  var packedRefsFile = getPackedRefsFile(gitPath);
+  if (packedRefsFile) {
+    return getLinesForRefPath(packedRefsFile, type, refPath).map(function(shaLine) {
       return getShaBasedOnType(type, shaLine);
-    }
+    });
   }
+  return [];
 }
 
-function getLineForRefPath(packedRefsFile, type, refPath) {
-  return getLinesForRefPath(packedRefsFile, type, refPath)[0];
+function getPackedRefsFile(gitPath) {
+  var packedRefsFilePath = path.join(gitPath, 'packed-refs');
+  return fs.existsSync(packedRefsFilePath) ? fs.readFileSync(packedRefsFilePath, { encoding: 'utf8' }) : false;
 }
 
 function getLinesForRefPath(packedRefsFile, type, refPath) {
@@ -143,22 +142,27 @@ function commitForTag(gitPath, tag) {
 }
 
 function findTag(gitPath, sha) {
-  var tag = findPackedTag(gitPath, sha);
-  if (tag) { return tag; }
+  var tags = findPackedTags(gitPath, sha)
+    .concat(findUnpackedTags(gitPath, sha));
+  tags.sort();
+  return tags.length ? tags[0] : false;
+}
 
-  var tagsPath = path.join(gitPath, 'refs', 'tags');
-  if (!fs.existsSync(tagsPath)) { return false; }
-
-  var tags = fs.readdirSync(tagsPath);
-
+function findUnpackedTags(gitPath, sha) {
+  var unpackedTags = [];
+  var tags = findLooseRefsForType(gitPath, 'tags');
   for (var i = 0, l = tags.length; i < l; i++) {
-    tag = tags[i];
     var commitAtTag = commitForTag(gitPath, tags[i]);
-
     if (commitAtTag === sha) {
-      return tag;
+      unpackedTags.push(tags[i]);
     }
   }
+  return unpackedTags;
+}
+
+function findLooseRefsForType(gitPath, type) {
+  var refsPath = path.join(gitPath, 'refs', type);
+  return fs.existsSync(refsPath) ? fs.readdirSync(refsPath) : [];
 }
 
 module.exports = function(gitPath) {
