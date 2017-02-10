@@ -94,6 +94,16 @@ describe('git-repo-info', function() {
         commonGitDir: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules', 'my-submodule'),
       });
     });
+
+    it('finds a repo via submodule on a specific path', function() {
+        process.chdir(path.join(testFixturesPath, 'submodule'));
+
+        var foundPathInfo = repoInfo._findRepo('my-submodule');
+        assert.deepEqual(foundPathInfo, {
+          worktreeGitDir: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules', 'my-submodule'),
+          commonGitDir: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules', 'my-submodule'),
+        });
+      });
   });
 
   describe('repoInfo', function() {
@@ -355,6 +365,29 @@ describe('git-repo-info', function() {
 
       assert.deepEqual(result, expected);
     });
+
+    it('returns an object for repo info for submodule on a specific path', function() {
+        process.chdir(path.join(testFixturesPath, 'submodule'));
+        var result = repoInfo('my-submodule');
+
+        var expected = {
+          branch: null,
+          sha: '409372f3bd07c11bfacee3963f48571d675268d7',
+          abbreviatedSha: '409372f3bd',
+          tag: null,
+          committer: null,
+          committerDate: null,
+          author: null,
+          authorDate: null,
+          commitMessage: null,
+          // This is a pretty meaningless "root" path.  The other information is
+          // correct, but we do not have full support for submodules at the
+          // moment.
+          root: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules')
+        };
+
+        assert.deepEqual(result, expected);
+      });
   });
 
   describe('repoInfo().root', function() {
