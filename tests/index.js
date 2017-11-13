@@ -121,7 +121,59 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: repoRoot
+        root: repoRoot,
+        lastTag: null,
+        commitsSinceLastTag: Infinity
+      };
+
+      assert.deepEqual(result, expected);
+    });
+
+    it('returns an object with repo info including the parent tag', function() {
+      var repoRoot = path.join(testFixturesPath, 'tag-on-parent');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+
+      var expected = {
+        branch: 'master',
+        sha: 'fb26504da0ed5cd9ed366f7428c06a8433fd76e6',
+        abbreviatedSha: 'fb26504da0',
+        tag: null,
+        committer: 'Lukas Kohler <lukas.kohler@ontheblueplanet.com>',
+        committerDate: '2017-10-14T02:02:43.000Z',
+        author: 'Lukas Kohler <lukas.kohler@ontheblueplanet.com>',
+        authorDate: '2017-10-14T02:02:43.000Z',
+        commitMessage: 'second commit without tag',
+        root: repoRoot,
+        parents: [
+          'e66f7ec2da3b5d06f0fe845c4fbc87247efacf62'
+        ],
+        lastTag: 'parent-magic-tag',
+        commitsSinceLastTag: 1
+      };
+
+      assert.deepEqual(result, expected);
+    });
+
+    it('returns an object with repo info including the parent tag before a merge commit', function() {
+      var repoRoot = path.join(testFixturesPath, 'tag-on-parent-before-merge');
+      var result = repoInfo(path.join(repoRoot, gitDir));
+
+      var expected = {
+        branch: 'master',
+        sha: 'b60d665ae0978a7b46e2447f4c13d7909997f56c',
+        abbreviatedSha: 'b60d665ae0',
+        tag: null,
+        committer: 'Lukas Kohler <lukas.kohler@ontheblueplanet.com>',
+        committerDate: '2017-11-13T14:54:49.000Z',
+        author: 'Lukas Kohler <lukas.kohler@ontheblueplanet.com>',
+        authorDate: '2017-11-13T14:54:49.000Z',
+        commitMessage: 'merge red and blue',
+        root: repoRoot,
+        parents: [
+          '4f5c726a1528fdfb1ec7c9537e4b1b2dbaacbcc4'
+        ],
+        lastTag: 'magic-tag',
+        commitsSinceLastTag: 1
       };
 
       assert.deepEqual(result, expected);
@@ -141,7 +193,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: repoRoot
+        root: repoRoot,
+        lastTag: null,
+        commitsSinceLastTag: Infinity
       };
 
       assert.deepEqual(result, expected);
@@ -161,7 +215,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: repoRoot
+        root: repoRoot,
+        lastTag: null,
+        commitsSinceLastTag: Infinity
       };
 
       assert.deepEqual(result, expected);
@@ -181,7 +237,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: repoRoot
+        root: repoRoot,
+        lastTag: 'my-tag',
+        commitsSinceLastTag: 0
       };
 
       assert.deepEqual(result, expected);
@@ -201,7 +259,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: repoRoot
+        root: repoRoot,
+        lastTag: 'example-annotated-tag',
+        commitsSinceLastTag: 0
       };
 
       assert.deepEqual(result, expected);
@@ -222,7 +282,9 @@ describe('git-repo-info', function() {
           author: 'Robert Jackson <robert.w.jackson@me.com>',
           authorDate: '2015-04-15T12:10:06.000Z',
           commitMessage: 'Initial commit.',
-          root: repoRoot
+          root: repoRoot,
+          lastTag: 'awesome-tag',
+          commitsSinceLastTag: 0
         };
 
         assert.deepEqual(result, expected);
@@ -242,7 +304,9 @@ describe('git-repo-info', function() {
           author: null,
           authorDate: null,
           commitMessage: null,
-          root: repoRoot
+          root: repoRoot,
+          lastTag: 'awesome-tag',
+          commitsSinceLastTag: 0
         };
 
         assert.deepEqual(result, expected);
@@ -263,7 +327,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: repoRoot
+        root: repoRoot,
+        lastTag: 'awesome-tag',
+        commitsSinceLastTag: 0
       };
 
       assert.deepEqual(result, expected);
@@ -296,7 +362,9 @@ describe('git-repo-info', function() {
           author: 'Robert Jackson <robert.w.jackson@me.com>',
           authorDate: '2015-04-15T12:10:06.000Z',
           commitMessage: 'Initial commit.',
-          root: repoRoot
+          root: repoRoot,
+          lastTag: 'awesome-tag',
+          commitsSinceLastTag: 0
         };
 
         assert.deepEqual(result, expected);
@@ -317,7 +385,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: repoRoot
+        root: repoRoot,
+        lastTag: null,
+        commitsSinceLastTag: Infinity
       };
 
       assert.deepEqual(result, expected);
@@ -337,7 +407,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: path.join(testFixturesPath, 'linked-worktree')
+        root: path.join(testFixturesPath, 'linked-worktree'),
+        lastTag: null,
+        commitsSinceLastTag: Infinity
       };
 
       assert.deepEqual(result, expected);
@@ -360,7 +432,9 @@ describe('git-repo-info', function() {
         // This is a pretty meaningless "root" path.  The other information is
         // correct, but we do not have full support for submodules at the
         // moment.
-        root: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules')
+        root: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules'),
+        lastTag: null,
+        commitsSinceLastTag: Infinity
       };
 
       assert.deepEqual(result, expected);
@@ -383,7 +457,9 @@ describe('git-repo-info', function() {
           // This is a pretty meaningless "root" path.  The other information is
           // correct, but we do not have full support for submodules at the
           // moment.
-          root: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules')
+          root: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules'),
+          lastTag: null,
+          commitsSinceLastTag: Infinity
         };
 
         assert.deepEqual(result, expected);

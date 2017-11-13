@@ -149,6 +149,40 @@ function findTag(gitPath, sha) {
   return tags.length ? tags[0] : false;
 }
 
+var LAST_TAG_CACHE = {};
+
+function findLastTagCached(gitPath, sha, commitsSinceLastTag) {
+  if(!LAST_TAG_CACHE[gitPath]) {
+    LAST_TAG_CACHE[gitPath] = {};
+  }
+
+  if(!LAST_TAG_CACHE[gitPath][sha]) {
+    LAST_TAG_CACHE[gitPath][sha] = findLastTag(gitPath, sha, commitsSinceLastTag);
+  }
+
+  return LAST_TAG_CACHE[gitPath][sha];
+}
+
+function findLastTag(gitPath, sha, commitsSinceLastTag) {
+  commitsSinceLastTag = commitsSinceLastTag || 0;
+  var tag = findTag(gitPath, sha);
+  if(!tag) {
+    var commitData = getCommitData(gitPath, sha);
+    if(!commitData) {
+      return { tag: null, commitsSinceLastTag: Infinity };
+    }
+    return commitData.parents
+      .map(parent => findLastTag(gitPath, parent, commitsSinceLastTag + 1))
+      .reduce((a,b) => {
+        return a.commitsSinceLastTag < b.commitsSinceLastTag ? a : b;
+      }, { commitsSinceLastTag: Infinity });
+  }
+  return {
+    tag: tag,
+    commitsSinceLastTag: commitsSinceLastTag
+  };
+}
+
 function findUnpackedTags(gitPath, sha) {
   var unpackedTags = [];
   var tags = findLooseRefsForType(gitPath, 'tags');
@@ -179,7 +213,9 @@ module.exports = function(gitPath) {
     author: null,
     authorDate: null,
     commitMessage: null,
-    root: null
+    root: null,
+    lastTag: null,
+    commitsSinceLastTag: 0,
   };
 
   if (!gitPathInfo) { return result; }
@@ -228,6 +264,10 @@ module.exports = function(gitPath) {
       if (tag) {
         result.tag = tag;
       }
+
+      var lastTagInfo = findLastTagCached(gitPathInfo.commonGitDir, result.sha);
+      result.lastTag = lastTagInfo.tag;
+      result.commitsSinceLastTag = lastTagInfo.commitsSinceLastTag;
     }
   } catch (e) {
     if (!module.exports._suppressErrors) {
@@ -263,7 +303,6 @@ function getCommitData(gitPath, sha) {
           case 'object':
           case 'type':
           case 'tree':
-          case 'parent':
             //ignore these for now
             break;
           case 'author':
@@ -274,6 +313,9 @@ function getCommitData(gitPath, sha) {
               data[part] = parts[1];
               data[part + 'Date'] = parseDate(parts[2]);
             }
+            break;
+          case 'parent':
+            data.parents = section.split('\n').map(p => p.split(' ')[1]);
             break;
           default:
             //should just be the commit message left
