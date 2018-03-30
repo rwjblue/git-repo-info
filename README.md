@@ -9,15 +9,19 @@ var getRepoInfo = require('git-repo-info');
 
 var info = getRepoInfo();
 
-info.branch         //=> will be the current branch
-info.sha            //=> will be the current sha
-info.abbreviatedSha //=> will be the first 10 chars of the current sha
-info.tag            //=> will be the tag for the current sha (or `null` if no tag exists)
-info.committer      //=> will be the committer for the current sha
-info.committerDate  //=> will be the commit date for the current sha
-info.author         //=> will be the author for the current sha
-info.authorDate     //=> will be the authored date for the current sha
-info.commitMessage  //=> will be the commit message for the current sha
+info.branch               // current branch
+info.sha                  // current sha
+info.abbreviatedSha       // first 10 chars of the current sha
+info.tag                  // tag for the current sha (or `null` if no tag exists)
+info.lastTag              // tag for the closest tagged ancestor
+                          //   (or `null` if no ancestor is tagged)
+info.commitsSinceLastTag  // number of commits since the closest tagged ancestor
+                          //   (`0` if this commit is tagged, or `Infinity` if no ancestor is tagged)
+info.committer            // committer for the current sha
+info.committerDate        // commit date for the current sha
+info.author               // author for the current sha
+info.authorDate           // authored date for the current sha
+info.commitMessage        // commit message for the current sha
 ```
 
 When called without any arguments, `git-repo-info` will automatically lookup upwards
