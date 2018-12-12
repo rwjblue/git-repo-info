@@ -32,6 +32,7 @@ describe('git-repo-info', function() {
       assert.deepEqual(foundPathInfo, {
         worktreeGitDir: path.join(repoRoot, gitDir),
         commonGitDir: path.join(repoRoot, gitDir),
+        root: repoRoot,
       });
     });
 
@@ -42,6 +43,7 @@ describe('git-repo-info', function() {
       assert.deepEqual(foundPathInfo, {
         worktreeGitDir: path.join(repoRoot, gitDir),
         commonGitDir: path.join(repoRoot, gitDir),
+        root: repoRoot,
       });
     });
 
@@ -52,6 +54,7 @@ describe('git-repo-info', function() {
       assert.deepEqual(foundPathInfo, {
         worktreeGitDir: path.join(repoRoot, gitDir),
         commonGitDir: path.join(repoRoot, gitDir),
+        root: repoRoot,
       });
     });
 
@@ -62,6 +65,7 @@ describe('git-repo-info', function() {
       assert.deepEqual(foundPathInfo, {
         worktreeGitDir: path.join(repoRoot, gitDir),
         commonGitDir: path.join(repoRoot, gitDir),
+        root: repoRoot,
       });
     });
 
@@ -72,16 +76,19 @@ describe('git-repo-info', function() {
       assert.deepEqual(foundPathInfo, {
         worktreeGitDir: path.join(repoRoot, gitDir),
         commonGitDir: path.join(repoRoot, gitDir),
+        root: repoRoot,
       });
     });
 
     it('finds a repo via a linked worktree', function() {
-      process.chdir(path.join(testFixturesPath, 'linked-worktree', 'linked'));
+      var worktreeRoot = path.join(testFixturesPath, 'linked-worktree', 'linked');
+      process.chdir(worktreeRoot);
 
       var foundPathInfo = repoInfo._findRepo();
       assert.deepEqual(foundPathInfo, {
         worktreeGitDir: path.join(testFixturesPath, 'linked-worktree', 'dot-git', 'worktrees', 'linked'),
         commonGitDir: path.join(testFixturesPath, 'linked-worktree', 'dot-git'),
+        root: path.join(testFixturesPath, 'linked-worktree'),
       });
     });
 
@@ -92,6 +99,7 @@ describe('git-repo-info', function() {
       assert.deepEqual(foundPathInfo, {
         worktreeGitDir: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules', 'my-submodule'),
         commonGitDir: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules', 'my-submodule'),
+        root: path.join(testFixturesPath, 'submodule', 'my-submodule'),
       });
     });
 
@@ -102,6 +110,7 @@ describe('git-repo-info', function() {
         assert.deepEqual(foundPathInfo, {
           worktreeGitDir: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules', 'my-submodule'),
           commonGitDir: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules', 'my-submodule'),
+          root: path.join(testFixturesPath, 'submodule', 'my-submodule'),
         });
       });
   });
@@ -109,7 +118,8 @@ describe('git-repo-info', function() {
   describe('repoInfo', function() {
     it('returns an object with repo info', function() {
       var repoRoot = path.join(testFixturesPath, 'nested-repo');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'master',
@@ -122,6 +132,8 @@ describe('git-repo-info', function() {
         authorDate: null,
         commitMessage: null,
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: null,
         commitsSinceLastTag: Infinity
       };
@@ -131,7 +143,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info including the parent tag', function() {
       var repoRoot = path.join(testFixturesPath, 'tag-on-parent');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'master',
@@ -144,6 +157,8 @@ describe('git-repo-info', function() {
         authorDate: '2017-10-14T02:02:43.000Z',
         commitMessage: 'second commit without tag',
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         parents: [
           'e66f7ec2da3b5d06f0fe845c4fbc87247efacf62'
         ],
@@ -156,7 +171,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info including the parent tag before a merge commit', function() {
       var repoRoot = path.join(testFixturesPath, 'tag-on-parent-before-merge');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'master',
@@ -169,6 +185,8 @@ describe('git-repo-info', function() {
         authorDate: '2017-11-13T14:54:49.000Z',
         commitMessage: 'merge red and blue',
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         parents: [
           '4f5c726a1528fdfb1ec7c9537e4b1b2dbaacbcc4'
         ],
@@ -181,7 +199,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info', function() {
       var repoRoot = path.join(testFixturesPath, 'detached-head');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: null,
@@ -194,6 +213,8 @@ describe('git-repo-info', function() {
         authorDate: null,
         commitMessage: null,
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: null,
         commitsSinceLastTag: Infinity
       };
@@ -203,7 +224,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info (packed commit)', function() {
       var repoRoot = path.join(testFixturesPath, 'commit-packed');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'develop',
@@ -216,6 +238,8 @@ describe('git-repo-info', function() {
         authorDate: null,
         commitMessage: null,
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: null,
         commitsSinceLastTag: Infinity
       };
@@ -225,7 +249,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info, including the tag (packed tags)', function() {
       var repoRoot = path.join(testFixturesPath, 'tagged-commit-packed');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'master',
@@ -238,6 +263,8 @@ describe('git-repo-info', function() {
         authorDate: null,
         commitMessage: null,
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: 'my-tag',
         commitsSinceLastTag: 0
       };
@@ -247,7 +274,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info, including the tag (packed annotated tag)', function() {
       var repoRoot = path.join(testFixturesPath, 'tagged-commit-packed-annotated');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'master',
@@ -260,6 +288,8 @@ describe('git-repo-info', function() {
         authorDate: null,
         commitMessage: null,
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: 'example-annotated-tag',
         commitsSinceLastTag: 0
       };
@@ -270,7 +300,8 @@ describe('git-repo-info', function() {
     if (zlib.inflateSync) {
       it('returns an object with repo info, including the tag (unpacked tags)', function() {
         var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');
-        var result = repoInfo(path.join(repoRoot, gitDir));
+        var localGitDir = path.join(repoRoot, gitDir);
+        var result = repoInfo(localGitDir);
 
         var expected = {
           branch: 'master',
@@ -283,6 +314,8 @@ describe('git-repo-info', function() {
           authorDate: '2015-04-15T12:10:06.000Z',
           commitMessage: 'Initial commit.',
           root: repoRoot,
+          commonGitDir: localGitDir,
+          worktreeGitDir: localGitDir,
           lastTag: 'awesome-tag',
           commitsSinceLastTag: 0
         };
@@ -292,7 +325,8 @@ describe('git-repo-info', function() {
     } else {
       it('returns an object with repo info, including the tag (unpacked tags)', function() {
         var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked');
-        var result = repoInfo(path.join(repoRoot, gitDir));
+        var localGitDir = path.join(repoRoot, gitDir);
+        var result = repoInfo(localGitDir);
 
         var expected = {
           branch: 'master',
@@ -305,6 +339,8 @@ describe('git-repo-info', function() {
           authorDate: null,
           commitMessage: null,
           root: repoRoot,
+          commonGitDir: localGitDir,
+          worktreeGitDir: localGitDir,
           lastTag: 'awesome-tag',
           commitsSinceLastTag: 0
         };
@@ -315,7 +351,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info, including the tag (unpacked tags) when a tag object does not exist', function() {
       var repoRoot = path.join(testFixturesPath, 'tagged-commit-unpacked-no-object');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'master',
@@ -328,6 +365,8 @@ describe('git-repo-info', function() {
         authorDate: null,
         commitMessage: null,
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: 'awesome-tag',
         commitsSinceLastTag: 0
       };
@@ -350,7 +389,8 @@ describe('git-repo-info', function() {
     if (zlib.inflateSync) {
       it('returns an object with repo info, including the tag (annotated tags)', function() {
         var repoRoot = path.join(testFixturesPath, 'tagged-annotated');
-        var result = repoInfo(path.join(repoRoot, gitDir));
+        var localGitDir = path.join(repoRoot, gitDir);
+        var result = repoInfo(localGitDir);
 
         var expected = {
           branch: 'master',
@@ -363,6 +403,8 @@ describe('git-repo-info', function() {
           authorDate: '2015-04-15T12:10:06.000Z',
           commitMessage: 'Initial commit.',
           root: repoRoot,
+          commonGitDir: localGitDir,
+          worktreeGitDir: localGitDir,
           lastTag: 'awesome-tag',
           commitsSinceLastTag: 0
         };
@@ -373,7 +415,8 @@ describe('git-repo-info', function() {
 
     it('returns an object with repo info, including the full branch name, if the branch name includes any slashes', function() {
       var repoRoot = path.join(testFixturesPath, 'branch-with-slashes');
-      var result = repoInfo(path.join(repoRoot, gitDir));
+      var localGitDir = path.join(repoRoot, gitDir);
+      var result = repoInfo(localGitDir);
 
       var expected = {
         branch: 'feature/branch/with/slashes',
@@ -386,6 +429,8 @@ describe('git-repo-info', function() {
         authorDate: null,
         commitMessage: null,
         root: repoRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: null,
         commitsSinceLastTag: Infinity
       };
@@ -394,7 +439,8 @@ describe('git-repo-info', function() {
     });
 
     it('returns an object with repo info for linked worktrees', function() {
-      process.chdir(path.join(testFixturesPath, 'linked-worktree', 'linked'));
+      var repoRoot = path.join(testFixturesPath, 'linked-worktree');
+      process.chdir(path.join(repoRoot, 'linked'));
       var result = repoInfo();
 
       var expected = {
@@ -407,7 +453,9 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        root: path.join(testFixturesPath, 'linked-worktree'),
+        root: repoRoot,
+        commonGitDir: path.join(repoRoot, gitDir),
+        worktreeGitDir: path.join(repoRoot, gitDir, 'worktrees', 'linked'),
         lastTag: null,
         commitsSinceLastTag: Infinity
       };
@@ -416,8 +464,36 @@ describe('git-repo-info', function() {
     });
 
     it('returns an object for repo info for submodules', function() {
-      process.chdir(path.join(testFixturesPath, 'submodule', 'my-submodule'));
+      var parentRoot = path.join(testFixturesPath, 'submodule');
+      var moduleRoot = path.join(parentRoot, 'my-submodule');
+      var localGitDir = path.join(parentRoot, gitDir, 'modules', 'my-submodule');
+      process.chdir(moduleRoot);
       var result = repoInfo();
+      var expected = {
+        branch: null,
+        sha: '409372f3bd07c11bfacee3963f48571d675268d7',
+        abbreviatedSha: '409372f3bd',
+        tag: null,
+        committer: null,
+        committerDate: null,
+        author: null,
+        authorDate: null,
+        commitMessage: null,
+        root: moduleRoot,
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
+        lastTag: null,
+        commitsSinceLastTag: Infinity
+      };
+
+      assert.deepEqual(result, expected);
+    });
+
+    it('returns an object for repo info for submodule on a specific path', function() {
+      var parentRoot = path.join(testFixturesPath, 'submodule');
+      var localGitDir = path.join(parentRoot, gitDir, 'modules', 'my-submodule');
+      process.chdir(parentRoot);
+      var result = repoInfo('my-submodule');
 
       var expected = {
         branch: null,
@@ -429,41 +505,15 @@ describe('git-repo-info', function() {
         author: null,
         authorDate: null,
         commitMessage: null,
-        // This is a pretty meaningless "root" path.  The other information is
-        // correct, but we do not have full support for submodules at the
-        // moment.
-        root: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules'),
+        root: path.join(parentRoot, 'my-submodule'),
+        commonGitDir: localGitDir,
+        worktreeGitDir: localGitDir,
         lastTag: null,
         commitsSinceLastTag: Infinity
       };
 
       assert.deepEqual(result, expected);
     });
-
-    it('returns an object for repo info for submodule on a specific path', function() {
-        process.chdir(path.join(testFixturesPath, 'submodule'));
-        var result = repoInfo('my-submodule');
-
-        var expected = {
-          branch: null,
-          sha: '409372f3bd07c11bfacee3963f48571d675268d7',
-          abbreviatedSha: '409372f3bd',
-          tag: null,
-          committer: null,
-          committerDate: null,
-          author: null,
-          authorDate: null,
-          commitMessage: null,
-          // This is a pretty meaningless "root" path.  The other information is
-          // correct, but we do not have full support for submodules at the
-          // moment.
-          root: path.join(testFixturesPath, 'submodule', 'dot-git', 'modules'),
-          lastTag: null,
-          commitsSinceLastTag: Infinity
-        };
-
-        assert.deepEqual(result, expected);
-      });
   });
 
   describe('repoInfo().root', function() {
@@ -477,6 +527,5 @@ describe('git-repo-info', function() {
     it('finds a repo with an argument', function() {
       assert.equal(repoInfo(path.join(repoRoot, 'foo', 'bar')).root, repoRoot);
     });
-
   });
 });
