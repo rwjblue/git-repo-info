@@ -9,9 +9,7 @@
     "index.d.ts"
   ],
   "scripts": {
-    "test": "mocha tests",
-    "preversion": "npm test",
-    "postversion": "git push && git push --tags && npm publish"
+    "test": "mocha tests"
   },
   "repository": {
     "type": "git",
