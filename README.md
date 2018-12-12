@@ -22,6 +22,12 @@ info.committerDate        // commit date for the current sha
 info.author               // author for the current sha
 info.authorDate           // authored date for the current sha
 info.commitMessage        // commit message for the current sha
+info.root                 // root directory for the Git repo or submodule
+                          //   (if in a worktree, this is the directory containing the original copy)
+info.commonGitDir         // directory containing Git metadata for this repo or submodule
+                          //   (if in a worktree, this is the primary Git directory for the repo)
+info.worktreeGitDir       // if in a worktree, the directory containing Git metadata specific to
+                          //   this worktree; otherwise, this is the same as `commonGitDir`.
 ```
 
 When called without any arguments, `git-repo-info` will automatically lookup upwards

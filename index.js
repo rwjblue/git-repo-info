@@ -12,12 +12,14 @@ function changeGitDir(newDirName) {
 
 function findRepoHandleLinkedWorktree(gitPath) {
   var stat = fs.statSync(gitPath);
+  var root = path.dirname(path.resolve(gitPath));
   if (stat.isDirectory()) {
     return {
       // for the base (non-linked) dir, there is no distinction between where we
       // find the HEAD file and where we find the rest of .git
       worktreeGitDir: gitPath,
       commonGitDir: gitPath,
+      root: root,
     };
   } else {
     // We have a file that tells us where to find the worktree git dir.  Once we
@@ -30,8 +32,7 @@ function findRepoHandleLinkedWorktree(gitPath) {
     var worktreeGitDir = path.resolve(absolutePath,worktreeGitDirUnresolved);
     var commonDirPath = path.join(worktreeGitDir, 'commondir');
     if (fs.existsSync(commonDirPath)) {
-      // this directory contains a `commondir` file; we're within a linked
-      // worktree
+      // this directory contains a `commondir` file; we're in a linked worktree
 
       var commonDirRelative = fs.readFileSync(commonDirPath).toString().replace(/\r?\n$/, '');
       var commonDir = path.resolve(path.join(worktreeGitDir, commonDirRelative));
@@ -39,12 +40,14 @@ function findRepoHandleLinkedWorktree(gitPath) {
       return {
         worktreeGitDir: worktreeGitDir,
         commonGitDir: commonDir,
+        root: path.dirname(commonDir),
       };
     } else {
       // there is no `commondir` file; we're in a submodule
       return {
         worktreeGitDir: worktreeGitDir,
         commonGitDir: worktreeGitDir,
+        root: root,
       };
     }
   }
@@ -94,7 +97,7 @@ function getPackedRefsFile(gitPath) {
 }
 
 function getLinesForRefPath(packedRefsFile, type, refPath) {
-  return packedRefsFile.split('\n').reduce(function(acc, line, idx, arr) {
+  return packedRefsFile.split(/\r?\n/).reduce(function(acc, line, idx, arr) {
     var targetLine = line.indexOf('^') > -1 ? arr[idx-1] : line;
     return doesLineMatchRefPath(type, line, refPath) ? acc.concat(targetLine) : acc;
   }, []);
@@ -132,7 +135,7 @@ function commitForTag(gitPath, tag) {
   // 'tag 172\u0000object c1ee41c325d54f410b133e0018c7a6b1316f6cda\ntype commit\ntag awesome-tag\ntagger Robert Jackson
   // <robert.w.jackson@me.com> 1429100021 -0400\n\nI am making an annotated tag.\n'
   if (objectContents.slice(0,3) === 'tag') {
-    var sections = objectContents.split(/\0|\n/);
+    var sections = objectContents.split(/\0|\r?\n/);
     var sha = sections[1].slice(7);
 
     return sha;
@@ -214,6 +217,8 @@ module.exports = function(gitPath) {
     authorDate: null,
     commitMessage: null,
     root: null,
+    commonGitDir: null,
+    worktreeGitDir: null,
     lastTag: null,
     commitsSinceLastTag: 0,
   };
@@ -221,9 +226,11 @@ module.exports = function(gitPath) {
   if (!gitPathInfo) { return result; }
 
   try {
-    result.root = path.resolve(gitPathInfo.commonGitDir, '..');
+    result.root = gitPathInfo.root;
+    result.commonGitDir = gitPathInfo.commonGitDir;
+    result.worktreeGitDir = gitPathInfo.worktreeGitDir;
 
-    var headFilePath   = path.join(gitPathInfo.worktreeGitDir, 'HEAD');
+    var headFilePath = path.join(gitPathInfo.worktreeGitDir, 'HEAD');
 
     if (fs.existsSync(headFilePath)) {
       var headFile = fs.readFileSync(headFilePath, {encoding: 'utf8'});
@@ -290,7 +297,7 @@ function getCommitData(gitPath, sha) {
   if (zlib.inflateSync && fs.existsSync(objectPath)) {
     var objectContents = zlib.inflateSync(fs.readFileSync(objectPath)).toString();
 
-    return objectContents.split(/\0|\n/)
+    return objectContents.split(/\0|\r?\n/)
       .filter(function(item) {
         return !!item;
       })
@@ -315,7 +322,7 @@ function getCommitData(gitPath, sha) {
             }
             break;
           case 'parent':
-            data.parents = section.split('\n').map(p => p.split(' ')[1]);
+            data.parents = section.split(/\r?\n/).map(p => p.split(' ')[1]);
             break;
           default:
             //should just be the commit message left
