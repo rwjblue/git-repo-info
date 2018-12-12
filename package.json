@@ -18,7 +18,7 @@
   "keywords": [
     "git"
   ],
-  "author": "Robert Jackson",
+  "author": "Robert Jackson <me@rwjblue.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/rwjblue/git-repo-info/issues"
