@@ -1,4 +1,4 @@
-declare function gitRepoInfo(): gitRepoInfo.GitRepoInfo;
+declare function gitRepoInfo(gitPath?: string): gitRepoInfo.GitRepoInfo;
 
 declare namespace gitRepoInfo {
   export interface GitRepoInfo {
