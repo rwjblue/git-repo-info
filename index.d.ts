@@ -12,6 +12,11 @@ declare namespace gitRepoInfo {
     tag: string | null;
     /** Tag for the closest tagged ancestor (or `null` if no ancestor is tagged) */
     lastTag: string | null;
+    /**
+     * Number of commits since the closest tagged ancestor.
+     * `0` if this commit is tagged, or `Infinity` if no ancestor is tagged.
+     */
+    commitsSinceLastTag: number;
     /** The committer of the current SHA */
     committer: string;
     /** The commit date of the current SHA */
