@@ -322,7 +322,10 @@ function getCommitData(gitPath, sha) {
             }
             break;
           case 'parent':
-            data.parents = section.split(/\r?\n/).map(p => p.split(' ')[1]);
+            if (!data.parents) {
+              data.parents = [];
+            }
+            data.parents.push(section.split(' ')[1]);
             break;
           default:
             //should just be the commit message left

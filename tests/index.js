@@ -188,6 +188,7 @@ describe('git-repo-info', function() {
         commonGitDir: localGitDir,
         worktreeGitDir: localGitDir,
         parents: [
+          'b0c8b86ee451a2f389eed64838449d9a00a0b45f',
           '4f5c726a1528fdfb1ec7c9537e4b1b2dbaacbcc4'
         ],
         lastTag: 'magic-tag',
