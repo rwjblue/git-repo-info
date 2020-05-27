@@ -154,36 +154,37 @@ function findTag(gitPath, sha) {
 
 var LAST_TAG_CACHE = {};
 
-function findLastTagCached(gitPath, sha, commitsSinceLastTag) {
+function findLastTagCached(gitPath, sha) {
   if(!LAST_TAG_CACHE[gitPath]) {
     LAST_TAG_CACHE[gitPath] = {};
   }
 
   if(!LAST_TAG_CACHE[gitPath][sha]) {
-    LAST_TAG_CACHE[gitPath][sha] = findLastTag(gitPath, sha, commitsSinceLastTag);
+    LAST_TAG_CACHE[gitPath][sha] = findLastTag(gitPath, sha);
   }
 
   return LAST_TAG_CACHE[gitPath][sha];
 }
 
-function findLastTag(gitPath, sha, commitsSinceLastTag) {
-  commitsSinceLastTag = commitsSinceLastTag || 0;
-  var tag = findTag(gitPath, sha);
-  if(!tag) {
-    var commitData = getCommitData(gitPath, sha);
-    if(!commitData) {
-      return { tag: null, commitsSinceLastTag: Infinity };
+function findLastTag(gitPath, sha) {
+  var queue = [{ sha: sha, depth: 0 }];
+  while (queue.length) {
+    var element = queue.shift();
+    var tag = findTag(gitPath, element.sha);
+    if (tag) {
+      return {
+        tag: tag,
+        commitsSinceLastTag: element.depth
+      };
     }
-    return commitData.parents
-      .map(parent => findLastTag(gitPath, parent, commitsSinceLastTag + 1))
-      .reduce((a,b) => {
-        return a.commitsSinceLastTag < b.commitsSinceLastTag ? a : b;
-      }, { commitsSinceLastTag: Infinity });
+    var commitData = getCommitData(gitPath, sha);
+    if (commitData && commitData.parents) {
+      for (var i = 0; i < commitData.parents.length; i++) {
+        queue.push({ sha: commitData.parents[i], depth: element.depth + 1 });
+      }
+    }
   }
-  return {
-    tag: tag,
-    commitsSinceLastTag: commitsSinceLastTag
-  };
+  return { tag: null, commitsSinceLastTag: Infinity };
 }
 
 function findUnpackedTags(gitPath, sha) {
