@@ -168,8 +168,13 @@ function findLastTagCached(gitPath, sha) {
 
 function findLastTag(gitPath, sha) {
   var queue = [{ sha: sha, depth: 0 }];
+  var seenCommits = new Set();
   while (queue.length) {
     var element = queue.shift();
+    if (seenCommits.has(element.sha)) {
+      continue;
+    }
+    seenCommits.add(element.sha);
     var tag = findTag(gitPath, element.sha);
     if (tag) {
       return {
