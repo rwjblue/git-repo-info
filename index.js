@@ -336,9 +336,9 @@ function getCommitData(gitPath, sha) {
           default:
             //should just be the commit message left
             if (!data.commitMessage) {
-              data.commitMessage = section
+              data.commitMessage = section;
             } else {
-              data.commitMessage = `${data.commitMessage}\n${section}`
+              data.commitMessage = `${data.commitMessage}\n${section}`;
             }
         }
 
